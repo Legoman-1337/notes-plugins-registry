@@ -7,5 +7,32 @@
     "description": "Учёт посещаемости, оплат и детских групп",
     "icon": "📋",
     "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/kinder-crm/kinder-crm.zip"
+  },
+  {
+    "id": "shopping-lists",
+    "name": "Покупки",
+    "version": "1.0.0",
+    "author": "Legoman",
+    "description": "Списки покупок: галочки, количество, цены и итоговая сумма",
+    "icon": "🛒",
+    "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/shopping-lists/shopping-lists.zip"
+  },
+  {
+    "id": "utilities",
+    "name": "Коммуналка",
+    "version": "1.0.0",
+    "author": "Legoman",
+    "description": "Счётчики воды и электричества: показания по месяцам, тарифы, расчёт суммы",
+    "icon": "💡",
+    "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/utilities/utilities.zip"
+  },
+  {
+    "id": "birthdays",
+    "name": "Дни рождения",
+    "version": "1.0.0",
+    "author": "Legoman",
+    "description": "Кто и когда празднует: ближайшие дни рождения, возраст",
+    "icon": "🎂",
+    "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/birthdays/birthdays.zip"
   }
 ]

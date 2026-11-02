@@ -1,0 +1,9 @@
+{
+  "id": "shopping-lists",
+  "name": "Покупки",
+  "version": "1.0.0",
+  "author": "Legoman",
+  "description": "Списки покупок: галочки, количество, цены и итоговая сумма",
+  "main": "plugin.js",
+  "icon": "🛒"
+}
