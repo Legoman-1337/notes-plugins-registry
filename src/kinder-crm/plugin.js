@@ -1,14 +1,16 @@
-/* Плагин «Журнал и Табель» (kinder-crm) для заметок.
+/* Плагин «Журнал и Табель» (kinder-crm) для заметок. v1.1
  * Контракт: activate(app) — app это мост к приложению:
  *   app.load() — данные плагина (JSON-строка), app.save(json), app.toast(text), app.close()
  * Данные: { children: [{id,name,group,fee,lessons}], months: { "YYYY-MM": { <childId>: {att:{день:1}, pay:[{d,a}] } } } }
+ * Интерфейс повторяет бумажный журнал: страница «Платежи» (левая) и страница «Табель» (правая).
  */
 (function () {
   var app = null;
   var root = null;
   var db = { children: [], months: {} };
-  var month = null;   // "YYYY-MM"
-  var group = null;   // выбранная группа или "all"
+  var month = null;    // "YYYY-MM"
+  var group = null;    // выбранная группа или "all"
+  var page = 'pay';    // "pay" — Платежи, "att" — Табель
   var expanded = null; // id раскрытой карточки ребёнка
   var confirmDeleteId = null;
 
@@ -76,7 +78,7 @@
     return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   }
 
-  /* ---------- отрисовка ---------- */
+  /* ---------- общая шапка ---------- */
 
   function render() {
     if (!root) return;
@@ -90,89 +92,131 @@
     });
 
     var html = '';
-    html += '<div class="row" style="justify-content:space-between;margin-bottom:10px">'
+    html += '<div class="row" style="justify-content:space-between;margin-bottom:8px">'
       + '<button class="btn secondary" data-act="prev-month">◀</button>'
       + '<h2 style="margin:0">' + esc(monthLabel(month)) + '</h2>'
       + '<button class="btn secondary" data-act="next-month">▶</button>'
       + '</div>';
 
-    html += '<div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:10px">'
+    html += '<div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px">'
       + '<button class="chip' + (group === 'all' ? ' active' : '') + '" data-act="group" data-group="all">Все</button>';
     groups().forEach(function (g) {
       html += '<button class="chip' + (group === g ? ' active' : '') + '" data-act="group" data-group="' + esc(g) + '">' + esc(g) + '</button>';
     });
     html += '</div>';
 
-    html += '<div class="card"><div class="row money" style="justify-content:space-between">'
-      + '<span class="muted">Занятий отмечено: <b>' + visits + '</b></span>'
+    // Две страницы, как разворот в бумажном журнале
+    html += '<div class="row" style="gap:6px;margin-bottom:8px">'
+      + '<button class="chip grow' + (page === 'pay' ? ' active' : '') + '" data-act="page" data-page="pay">💵 Платежи</button>'
+      + '<button class="chip grow' + (page === 'att' ? ' active' : '') + '" data-act="page" data-page="att">✓ Табель</button>'
+      + '</div>';
+
+    html += '<div class="card money" style="padding:8px 12px"><div class="row" style="justify-content:space-between">'
       + '<span class="muted">Оплачено: <b>' + money(paid) + '</b> из ' + money(expected) + ' ₽</span>'
+      + '<span class="muted">Занятий: <b>' + visits + '</b></span>'
       + '</div>'
-      + '<div style="height:8px;border-radius:4px;background:var(--surface2);margin-top:8px;overflow:hidden">'
+      + '<div style="height:6px;border-radius:3px;background:var(--surface2);margin-top:6px;overflow:hidden">'
       + '<div style="height:100%;width:' + (expected > 0 ? Math.min(100, Math.round(paid * 100 / expected)) : 0) + '%;background:var(--accent)"></div>'
       + '</div></div>';
 
-    if (children.length === 0) {
-      html += '<div class="card" style="text-align:center"><p class="muted" style="margin:6px 0">В этой группе пока нет детей</p>'
-        + '<button class="btn" data-act="show-add">+ Добавить ребёнка</button></div>';
-    }
+    html += page === 'pay' ? pagePayments(children) : pageAttendance(children);
 
-    children.forEach(function (c) {
-      var r = record(c.id);
-      var p = paidSum(r);
-      var fee = parseInt(c.fee, 10) || 0;
-      var open = expanded === c.id;
-      var payRows = '';
-      (r.pay || []).forEach(function (pay, index) {
-        payRows += '<div class="row" style="justify-content:space-between;padding:3px 0">'
-          + '<span class="muted">' + esc(pay.d) + '</span><span class="money"><b>' + money(pay.a) + ' ₽</b></span>'
-          + '<button class="btn danger small" data-act="del-pay" data-child="' + esc(c.id) + '" data-index="' + index + '">✕</button></div>';
-      });
-
-      var days = '';
-      var total = daysInMonth(month);
-      for (var d = 1; d <= total; d++) {
-        days += '<button class="day' + (r.att[d] ? ' on' : '') + '" data-act="toggle-day" data-child="' + esc(c.id) + '" data-day="' + d + '">' + d + '</button>';
-      }
-
-      html += '<div class="card">'
-        + '<div class="row" data-act="toggle-expand" data-child="' + esc(c.id) + '" style="cursor:pointer">'
-        + '<div class="grow"><b>' + esc(c.name) + '</b><div class="muted" style="font-size:12px">'
-        + esc(c.group) + ' · ' + (c.lessons ? esc(c.lessons) + ' зан. · ' : '') + (fee ? money(fee) + ' ₽/мес' : 'без абонемента')
-        + '</div></div>'
-        + '<div style="text-align:right"><div class="money" style="color:' + (fee > 0 && p >= fee ? 'var(--accent)' : 'var(--text)') + '"><b>' + money(p) + '</b> / ' + money(fee) + ' ₽</div>'
-        + '<div class="muted" style="font-size:12px">был: ' + attendanceCount(r) + ' раз</div></div>'
-        + '<span class="muted" style="margin-left:6px">' + (open ? '▾' : '▸') + '</span>'
-        + '</div>';
-
-      if (open) {
-        html += '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'
-          + '<div class="muted" style="font-size:12px;margin-bottom:6px">Абонемент</div>'
-          + '<div class="row">'
-          + '<input type="number" inputmode="numeric" style="width:110px" placeholder="Сумма ₽" value="' + (c.fee || '') + '" data-field="fee" data-child="' + esc(c.id) + '">'
-          + '<input type="number" inputmode="numeric" style="width:80px" placeholder="Занятий" value="' + (c.lessons || '') + '" data-field="lessons" data-child="' + esc(c.id) + '">'
-          + '<button class="btn danger small" data-act="' + (confirmDeleteId === c.id ? 'confirm-del-child' : 'ask-del-child') + '" data-child="' + esc(c.id) + '">'
-          + (confirmDeleteId === c.id ? 'Точно удалить?' : 'Удалить') + '</button>'
-          + '</div>'
-          + '<div class="muted" style="font-size:12px;margin:10px 0 6px">Табель — нажмите дату, чтобы отметить</div>'
-          + '<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px">' + days + '</div>'
-          + '<div class="muted" style="font-size:12px;margin:10px 0 6px">Платежи</div>'
-          + (payRows || '<div class="muted" style="font-size:13px">Платежей пока нет</div>')
-          + '<div class="row" style="margin-top:6px">'
-          + '<input type="number" inputmode="numeric" style="width:70px" placeholder="День" id="pay-day-' + esc(c.id) + '" value="' + new Date().getDate() + '">'
-          + '<input type="number" inputmode="numeric" class="grow" placeholder="Сумма ₽" id="pay-amount-' + esc(c.id) + '">'
-          + '<button class="btn small" data-act="add-pay" data-child="' + esc(c.id) + '">+ Оплата</button>'
-          + '</div>'
-          + '</div>';
-      }
-      html += '</div>';
-    });
-
-    html += '<div class="card" style="text-align:center">'
+    html += '<div class="card" style="text-align:center;padding:10px">'
       + '<button class="btn" data-act="show-add">+ Ребёнок</button></div>';
 
     if (showAdd) html += addFormHtml();
 
     root.innerHTML = html;
+  }
+
+  /* ---------- страница «Платежи» (как левая страница журнала) ---------- */
+
+  function pagePayments(children) {
+    if (children.length === 0) {
+      return '<div class="card" style="text-align:center"><p class="muted" style="margin:6px 0">В этой группе пока нет детей</p></div>';
+    }
+    var html = '';
+    children.forEach(function (c, number) {
+      var r = record(c.id);
+      var fee = parseInt(c.fee, 10) || 0;
+      var p = paidSum(r);
+      var open = expanded === c.id;
+
+      // Строка ребёнка: № | Имя | занятий | абонемент | оплачено
+      html += '<div class="card" style="padding:0;overflow:hidden">'
+        + '<div class="row money" data-act="toggle-expand" data-child="' + esc(c.id) + '" style="cursor:pointer;padding:10px 12px;gap:10px">'
+        + '<span class="muted" style="width:16px">' + (number + 1) + '</span>'
+        + '<div class="grow" style="min-width:0"><b>' + esc(c.name) + '</b>'
+        + '<div class="muted" style="font-size:11px">' + esc(c.group) + '</div></div>'
+        + '<div style="text-align:right">'
+        + '<div>' + (c.lessons ? esc(c.lessons) + ' зан.' : '—') + ' · ' + money(fee) + ' ₽</div>'
+        + '<div style="font-size:12px;color:' + (fee > 0 && p >= fee ? 'var(--accent)' : 'var(--muted)') + '">оплачено ' + money(p) + ' ₽</div>'
+        + '</div>'
+        + '<span class="muted">' + (open ? '▾' : '▸') + '</span>'
+        + '</div>';
+
+      if (open) {
+        // оплаты по датам — как записано в журнале
+        html += '<div style="padding:4px 12px 10px;border-top:1px solid var(--border)">';
+        html += '<div class="muted" style="font-size:11px;margin:8px 0 4px">ОПЛАТЫ</div>';
+        if ((r.pay || []).length === 0) {
+          html += '<div class="muted" style="font-size:13px">пока ничего не оплачено</div>';
+        } else {
+          (r.pay || []).forEach(function (pay, index) {
+            html += '<div class="row money" style="justify-content:space-between;padding:3px 0">'
+              + '<span>' + esc(pay.d) + '</span>'
+              + '<b>' + money(pay.a) + ' ₽</b>'
+              + '<button class="btn danger small" data-act="del-pay" data-child="' + esc(c.id) + '" data-index="' + index + '">✕</button>'
+              + '</div>';
+          });
+        }
+        html += '<div class="row" style="margin-top:8px">'
+          + '<input type="number" inputmode="numeric" style="width:64px" placeholder="День" id="pay-day-' + esc(c.id) + '" value="' + new Date().getDate() + '">'
+          + '<input type="number" inputmode="numeric" class="grow" placeholder="Сумма ₽" id="pay-amount-' + esc(c.id) + '">'
+          + '<button class="btn small" data-act="add-pay" data-child="' + esc(c.id) + '">+ Оплата</button>'
+          + '</div>';
+
+        // редактирование абонемента
+        html += '<div class="row" style="margin-top:10px">'
+          + '<input type="number" inputmode="numeric" style="width:100px" placeholder="Абонемент ₽" value="' + (c.fee || '') + '" data-field="fee" data-child="' + esc(c.id) + '">'
+          + '<input type="number" inputmode="numeric" style="width:80px" placeholder="Занятий" value="' + (c.lessons || '') + '" data-field="lessons" data-child="' + esc(c.id) + '">'
+          + '<button class="btn danger small" data-act="' + (confirmDeleteId === c.id ? 'confirm-del-child' : 'ask-del-child') + '" data-child="' + esc(c.id) + '">'
+          + (confirmDeleteId === c.id ? 'Точно удалить?' : 'Удалить') + '</button>'
+          + '</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    return html;
+  }
+
+  /* ---------- страница «Табель» (как правая страница журнала) ---------- */
+
+  function pageAttendance(children) {
+    if (children.length === 0) {
+      return '<div class="card" style="text-align:center"><p class="muted" style="margin:6px 0">В этой группе пока нет детей</p></div>';
+    }
+    var total = daysInMonth(month);
+    var header = '';
+    for (var d = 1; d <= total; d++) {
+      header += '<th>' + d + '</th>';
+    }
+    var rows = '';
+    children.forEach(function (c) {
+      var r = record(c.id);
+      rows += '<tr>'
+        + '<td class="namecol">' + esc(c.name) + '</td>';
+      for (var d = 1; d <= total; d++) {
+        rows += '<td><button class="day' + (r.att[d] ? ' on' : '') + '" data-act="toggle-day" data-child="' + esc(c.id) + '" data-day="' + d + '">' + (r.att[d] ? '+' : '') + '</button></td>';
+      }
+      rows += '<td class="money"><b>' + attendanceCount(r) + '</b></td>';
+      rows += '</tr>';
+    });
+    var legend = '<div class="muted" style="font-size:11px;margin:6px 2px">Нажмите клетку — поставится «+» (был на занятии). Последний столбец — сколько раз за месяц.</div>';
+    return '<div class="card" style="padding:8px;overflow-x:auto">'
+      + '<table class="atttable"><thead><tr><th class="namecol">Ребёнок</th>' + header + '<th>Итог</th></tr></thead>'
+      + '<tbody>' + rows + '</tbody></table>'
+      + '</div>' + legend;
   }
 
   var showAdd = false;
@@ -202,6 +246,7 @@
 
     if (act === 'prev-month') return shiftMonth(-1);
     if (act === 'next-month') return shiftMonth(1);
+    if (act === 'page') { page = el.getAttribute('data-page'); return render(); }
     if (act === 'group') { group = el.getAttribute('data-group'); confirmDeleteId = null; return render(); }
     if (act === 'toggle-expand') {
       if (expanded === childId) { expanded = null; confirmDeleteId = null; } else { expanded = childId; confirmDeleteId = null; }
@@ -284,6 +329,7 @@
     app = api;
     month = todayMonth();
     group = 'all';
+    page = 'pay';
 
     try { db = JSON.parse(app.load() || '{}') || {}; } catch (e) { db = {}; }
     if (!db.children || !(db.children instanceof Array)) db.children = [];
