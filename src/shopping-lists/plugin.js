@@ -73,11 +73,12 @@
     html += '</div>';
 
     // добавить товар
-    html += '<div class="card"><div class="row">'
-      + '<input type="text" id="item-name" class="grow" placeholder="Товар">'
-      + '<input type="number" inputmode="decimal" style="width:70px" id="item-qty" placeholder="Шт." value="1">'
-      + '<input type="number" inputmode="decimal" style="width:90px" id="item-price" placeholder="₽">'
-      + '<button class="btn" data-act="add-item">+</button></div></div>';
+    html += '<div class="card"><div class="row" style="margin-bottom:6px">'
+      + '<input type="text" id="item-name" class="grow" placeholder="Что купить?"></div>'
+      + '<div class="row">'
+      + '<input type="number" inputmode="decimal" class="grow" id="item-qty" placeholder="Кол-во" value="1">'
+      + '<input type="number" inputmode="decimal" class="grow" id="item-price" placeholder="Цена, ₽">'
+      + '<button class="btn" data-act="add-item">+ Добавить</button></div></div>';
 
     // управление списком
     html += '<div class="card" style="text-align:center;padding:10px">'
