@@ -1,7 +1,7 @@
 {
   "id": "debts",
-  "name": "Долженки",
-  "version": "1.0.0",
+  "name": "Долг",
+  "version": "1.0.1",
   "author": "Legoman",
   "description": "Кто сколько должен: отметка возврата, суммы «мне должны / я должен»",
   "main": "plugin.js",

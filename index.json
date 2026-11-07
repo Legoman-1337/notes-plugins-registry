@@ -19,8 +19,8 @@
   },
   {
     "id": "debts",
-    "name": "Долженки",
-    "version": "1.0.0",
+    "name": "Долг",
+    "version": "1.0.1",
     "author": "Legoman",
     "description": "Кто сколько должен: отметка возврата, суммы «мне должны / я должен»",
     "icon": "💰",
@@ -34,5 +34,32 @@
     "description": "Недельное расписание занятий: колонки-дни, подсветка «сейчас»",
     "icon": "🗓️",
     "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/schedule/schedule.zip"
+  },
+  {
+    "id": "birthdays",
+    "name": "Дни рождения",
+    "version": "1.0.0",
+    "author": "Legoman",
+    "description": "Кто и когда празднует: ближайшие дни рождения, возраст, сортировка по дате",
+    "icon": "🎂",
+    "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/birthdays/birthdays.zip"
+  },
+  {
+    "id": "shopping-lists",
+    "name": "Покупки",
+    "version": "1.0.0",
+    "author": "Legoman",
+    "description": "Списки покупок: галочки, количество, цены и итоговая сумма",
+    "icon": "🛒",
+    "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/shopping-lists/shopping-lists.zip"
+  },
+  {
+    "id": "utilities",
+    "name": "Коммуналка",
+    "version": "1.0.0",
+    "author": "Legoman",
+    "description": "Счётчики воды и электричества: показания по месяцам, тарифы, расчёт суммы",
+    "icon": "💡",
+    "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/utilities/utilities.zip"
   }
 ]

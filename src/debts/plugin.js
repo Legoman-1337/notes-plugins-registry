@@ -1,4 +1,4 @@
-/* Плагин «Долженки» (debts). v1.0.0
+/* Плагин «Долг» (debts). v1.0.1
  * activate(app): app.load() / app.save(json) / app.toast(text) / app.close()
  * Данные: { items: [{id,name,amount,due,note,done}] }
  * Кто сколько должен (и кому вы): отметка возврата, сумма к получению/выдаче.
