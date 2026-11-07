@@ -2,37 +2,37 @@
   {
     "id": "kinder-crm",
     "name": "Журнал и Табель",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "author": "Legoman",
-    "description": "Учёт посещаемости, оплат и детских групп",
+    "description": "Учёт посещаемости, оплат и детских групп: табель с плюсиками, платежи по датам, свои группы (столбцы журнала)",
     "icon": "📋",
     "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/kinder-crm/kinder-crm.zip"
   },
   {
-    "id": "shopping-lists",
-    "name": "Покупки",
+    "id": "habits",
+    "name": "Привычки",
     "version": "1.0.0",
     "author": "Legoman",
-    "description": "Списки покупок: галочки, количество, цены и итоговая сумма",
-    "icon": "🛒",
-    "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/shopping-lists/shopping-lists.zip"
+    "description": "Трекер привычек: сетка последних 14 дней, серии подряд",
+    "icon": "🔥",
+    "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/habits/habits.zip"
   },
   {
-    "id": "utilities",
-    "name": "Коммуналка",
+    "id": "debts",
+    "name": "Долженки",
     "version": "1.0.0",
     "author": "Legoman",
-    "description": "Счётчики воды и электричества: показания по месяцам, тарифы, расчёт суммы",
-    "icon": "💡",
-    "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/utilities/utilities.zip"
+    "description": "Кто сколько должен: отметка возврата, суммы «мне должны / я должен»",
+    "icon": "💰",
+    "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/debts/debts.zip"
   },
   {
-    "id": "birthdays",
-    "name": "Дни рождения",
+    "id": "schedule",
+    "name": "Расписание",
     "version": "1.0.0",
     "author": "Legoman",
-    "description": "Кто и когда празднует: ближайшие дни рождения, возраст",
-    "icon": "🎂",
-    "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/birthdays/birthdays.zip"
+    "description": "Недельное расписание занятий: колонки-дни, подсветка «сейчас»",
+    "icon": "🗓️",
+    "download_url": "https://raw.githubusercontent.com/Legoman-1337/notes-plugins-registry/main/plugins/schedule/schedule.zip"
   }
 ]

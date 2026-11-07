@@ -1,0 +1,9 @@
+{
+  "id": "schedule",
+  "name": "Расписание",
+  "version": "1.0.0",
+  "author": "Legoman",
+  "description": "Недельное расписание занятий: колонки-дни, подсветка «сейчас»",
+  "main": "plugin.js",
+  "icon": "🗓️"
+}

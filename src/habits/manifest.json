@@ -1,0 +1,9 @@
+{
+  "id": "habits",
+  "name": "Привычки",
+  "version": "1.0.0",
+  "author": "Legoman",
+  "description": "Трекер привычек: сетка последних 14 дней, серии подряд",
+  "main": "plugin.js",
+  "icon": "🔥"
+}
